@@ -1,3 +1,4 @@
+import 'package:code_challenge_taller/data/api.dart';
 import 'package:flutter/material.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -14,22 +15,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   bool isLoading = false;
 
-  Future<Map<String, bool>> simulateApi({required String username, required String password}) async {
-    await Future.delayed(Duration(seconds: 2));
-    if (username == 'flutter' && password == 'dev') {
-      return {
-        'success': true
-      };
-    }
-    throw Error();
-  }
-
   void _handleSignIn(BuildContext context) async {
     try {
       setState(() {
         isLoading = true;
       });
-      await simulateApi(username: _usernameController.text, password: _passwordController.text);
+      await Api.getData(username: _usernameController.text, password: _passwordController.text);
       Navigator.pushNamed(context, '/welcome');
     } catch (e) {
       final snackBar = SnackBar(content: Text('Something wrong happened. Try again.'));
@@ -47,27 +38,72 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text("test"),
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        elevation: 0,
+        title: const Text(
+          "Home",
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+        ),
+        centerTitle: true,
       ),
-      body: Center(
-        child: Padding(
+      body: Padding(
+        padding: const EdgeInsets.only(top: 24),
+        child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              TextField(controller: _usernameController, decoration: InputDecoration(labelText: "Username"),),
-              SizedBox(height: 8,),
-              TextField(controller: _passwordController,decoration: InputDecoration(labelText: "Password"),),
-              SizedBox(height: 16,),
+              const Icon(Icons.lock_outline, size: 80, color: Colors.redAccent),
+              const SizedBox(height: 32),
+              TextField(
+                controller: _usernameController,
+                decoration: InputDecoration(
+                  labelText: "Username",
+                  prefixIcon: const Icon(Icons.person),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _passwordController,
+                obscureText: true,
+                decoration: InputDecoration(
+                  labelText: "Password",
+                  prefixIcon: const Icon(Icons.lock),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
               ElevatedButton(
-                  onPressed: isLoading ? null : () => _handleSignIn(context),
-                  child: SizedBox(height: 50,child: Center(child: !isLoading ? Text("Login") : CircularProgressIndicator(strokeWidth: 1, color: Colors.blue,),),)
-              )
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.redAccent,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                onPressed: isLoading ? null : () => _handleSignIn(context),
+                child: isLoading
+                    ? const SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
+                )
+                    : const Text("Login", style: TextStyle(fontSize: 16)),
+              ),
             ],
           ),
         ),
       ),
     );
   }
+
 }
